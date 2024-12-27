@@ -7,7 +7,6 @@ import os
 import sys
 import json
 import tempfile
-import shutil
 
 import numpy as np
 
@@ -23,8 +22,6 @@ def make_scanner():
 # %% Scanner lookup table
 
 def test_scanner_lookup_table():
-    tmp_dir = tempfile.mkdtemp()
-
     # Create scanner
     scanner = yrt.Scanner(scannerName='test_scanner',
                           axialFOV=25,
@@ -41,41 +38,44 @@ def test_scanner_lookup_table():
 
     det_coords_ref = yrt.DetRegular(scanner)
     det_coords_ref.generateLUT()
-    lut_fname = os.path.join(tmp_dir, 'test_scanner.lut')
-    det_coords_ref.writeToFile(lut_fname)
-    lut_ref = np.reshape(np.fromfile(lut_fname,
-                                     dtype=np.float32), [-1, 6])
-    # Create mask
-    mask_fname = os.path.join(tmp_dir, 'test_scanner_mask.raw')
-    lut_mask = (np.arange(len(lut_ref)) % 100) != 0
-    lut_mask.tofile(mask_fname)
 
-    # Create scanner with masked detectors
-    scanner_fname = os.path.join(tmp_dir, 'test_scanner.json')
-    scanner_dict = {
-        'VERSION': yrt.Scanner.SCANNER_FILE_VERSION,
-        'scannerName' : 'test_scanner',
-        'detCoord' : 'test_scanner.lut',
-        'detMask' : 'test_scanner_mask.raw',
-        'axialFOV': scanner.axialFOV,
-        'crystalSize_z': scanner.crystalSize_z,
-        'crystalSize_trans': scanner.crystalSize_trans,
-        'crystalDepth': scanner.crystalDepth,
-        'scannerRadius': scanner.scannerRadius,
-        'fwhm': scanner.fwhm,
-        'energyLLD': scanner.energyLLD,
-        'collimatorRadius': scanner.collimatorRadius,
-        'dets_per_ring': scanner.detsPerRing,
-        'num_rings': scanner.numRings,
-        'num_doi': scanner.numDOI,
-        'max_ring_diff': scanner.maxRingDiff,
-        'min_ang_diff': scanner.minAngDiff,
-        'dets_per_block': scanner.detsPerBlock}
-    with open(scanner_fname, 'wt') as fid:
-        json.dump(scanner_dict, fid)
+    with tempfile.TemporaryDirectory() as tmp_dir:
 
-    # Load scanner
-    scanner = yrt.Scanner(scanner_fname)
+        lut_fname = os.path.join(tmp_dir, 'test_scanner.lut')
+        det_coords_ref.writeToFile(lut_fname)
+        lut_ref = np.reshape(np.fromfile(lut_fname,
+                                         dtype=np.float32), [-1, 6])
+        # Create mask
+        mask_fname = os.path.join(tmp_dir, 'test_scanner_mask.raw')
+        lut_mask = (np.arange(len(lut_ref)) % 100) != 0
+        lut_mask.tofile(mask_fname)
+
+        # Create scanner with masked detectors
+        scanner_fname = os.path.join(tmp_dir, 'test_scanner.json')
+        scanner_dict = {
+            'VERSION': yrt.Scanner.SCANNER_FILE_VERSION,
+            'scannerName' : 'test_scanner',
+            'detCoord' : 'test_scanner.lut',
+            'detMask' : 'test_scanner_mask.raw',
+            'axialFOV': scanner.axialFOV,
+            'crystalSize_z': scanner.crystalSize_z,
+            'crystalSize_trans': scanner.crystalSize_trans,
+            'crystalDepth': scanner.crystalDepth,
+            'scannerRadius': scanner.scannerRadius,
+            'fwhm': scanner.fwhm,
+            'energyLLD': scanner.energyLLD,
+            'collimatorRadius': scanner.collimatorRadius,
+            'dets_per_ring': scanner.detsPerRing,
+            'num_rings': scanner.numRings,
+            'num_doi': scanner.numDOI,
+            'max_ring_diff': scanner.maxRingDiff,
+            'min_ang_diff': scanner.minAngDiff,
+            'dets_per_block': scanner.detsPerBlock}
+        with open(scanner_fname, 'wt') as fid:
+            json.dump(scanner_dict, fid)
+
+        # Load scanner
+        scanner = yrt.Scanner(scanner_fname)
     lut = scanner.createLUT()
     bin_id = 10
     # Ensure scanner object is functional after extraction of lookup table
@@ -85,8 +85,6 @@ def test_scanner_lookup_table():
 
     assert not scanner.isLORAllowed(0, 1)
     assert scanner.isLORAllowed(1, 2)
-
-    shutil.rmtree(tmp_dir)
 
 # %% Image transformation
 
