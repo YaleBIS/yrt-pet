@@ -57,13 +57,13 @@ target_link_libraries(test_runner_misc PUBLIC Catch)
 add_test(test_runner_misc test_runner_misc)
 
 if(${BUILD_PYBIND11})
-    set(SOURCE_PYTEST
-	test_datastruct.py)
+  set(SOURCE_PYTEST
+    test_datastruct.py)
 
-    add_pytest(YRTPET_UNIT "${SOURCE_PYTEST}"
-	${CMAKE_SOURCE_DIR}/unit_tests
-	${CMAKE_BINARY_DIR}/unit_tests)
+  add_pytest(YRTPET_UNIT "${SOURCE_PYTEST}"
+    ${CMAKE_SOURCE_DIR}/unit_tests
+    ${CMAKE_BINARY_DIR}/unit_tests)
 
-    add_test(NAME pytest_tests
-	COMMAND pytest ${CMAKE_BINARY_DIR}/unit_tests)
+  add_test(NAME pytest_tests
+    COMMAND pytest ${CMAKE_BINARY_DIR}/unit_tests)
 endif()

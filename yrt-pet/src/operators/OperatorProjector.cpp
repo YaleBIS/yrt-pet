@@ -195,26 +195,30 @@ void OperatorProjector::applyA(const Variable* in, Variable* out)
 		ProjectionProperties projectionProperties =
 		    dat->getProjectionProperties(bin);
 
-		float imProj = forwardProjection(img, projectionProperties);
-
-		if (addHisto != nullptr)
+		if (projectionProperties.lor.point1.x !=
+		    std::numeric_limits<float>::infinity())
 		{
-			// Additive correction(s)
-			const histo_bin_t histoBin = dat->getHistogramBin(bin);
-			imProj += addHisto->getProjectionValueFromHistogramBin(histoBin);
-		}
+			float imProj = forwardProjection(img, projectionProperties);
 
-		if (attImageForForwardProjection != nullptr)
-		{
-			// Multiplicative attenuation correction (for motion)
-			const float attProj = forwardProjection(
-			    attImageForForwardProjection, projectionProperties);
-			const float attProj_coeff =
-			    Util::getAttenuationCoefficientFactor(attProj);
-			imProj *= attProj_coeff;
-		}
+			if (addHisto != nullptr)
+			{
+				// Additive correction(s)
+				const histo_bin_t histoBin = dat->getHistogramBin(bin);
+				imProj += addHisto->getProjectionValueFromHistogramBin(histoBin);
+			}
 
-		dat->setProjectionValue(bin, static_cast<float>(imProj));
+			if (attImageForForwardProjection != nullptr)
+			{
+				// Multiplicative attenuation correction (for motion)
+				const float attProj = forwardProjection(
+					attImageForForwardProjection, projectionProperties);
+				const float attProj_coeff =
+					Util::getAttenuationCoefficientFactor(attProj);
+				imProj *= attProj_coeff;
+			}
+
+			dat->setProjectionValue(bin, static_cast<float>(imProj));
+		}
 	}
 }
 
@@ -235,25 +239,30 @@ void OperatorProjector::applyAH(const Variable* in, Variable* out)
 		ProjectionProperties projectionProperties =
 		    dat->getProjectionProperties(bin);
 
-		// TODO: What to do with randomsEstimate ?
-
-		float projValue = dat->getProjectionValue(bin);
-		if (std::abs(projValue) < SMALL)
+		if (projectionProperties.lor.point1.x !=
+		    std::numeric_limits<float>::infinity())
 		{
-			continue;
-		}
+			// TODO: What to do with randomsEstimate ?
 
-		if (attImageForBackprojection != nullptr)
-		{
-			// Multiplicative attenuation correction
-			const float attProj = forwardProjection(attImageForBackprojection,
-			                                        projectionProperties);
-			const float attProj_coeff =
-			    Util::getAttenuationCoefficientFactor(attProj);
-			projValue *= attProj_coeff;
-		}
+			float projValue = dat->getProjectionValue(bin);
+			if (std::abs(projValue) < SMALL)
+			{
+				continue;
+			}
 
-		backProjection(img, projectionProperties, projValue);
+			if (attImageForBackprojection != nullptr)
+			{
+				// Multiplicative attenuation correction
+				const float attProj = forwardProjection(
+				    attImageForBackprojection, projectionProperties);
+
+				const float attProj_coeff =
+					Util::getAttenuationCoefficientFactor(attProj);
+				projValue *= attProj_coeff;
+			}
+
+			backProjection(img, projectionProperties, projValue);
+		}
 	}
 }
 
