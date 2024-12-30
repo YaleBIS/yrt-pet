@@ -156,7 +156,7 @@ if (BUILD_PYBIND11)
     endfunction()
 
     # Add integration test
-    function(add_pytest_integration NAME SOURCES INPUT_DIR OUTPUT_DIR)
+    function(add_pytest NAME SOURCES INPUT_DIR OUTPUT_DIR)
         add_custom_target(copy_pytest_${NAME} ALL)
         foreach (FILE ${SOURCES})
             add_custom_command(TARGET copy_pytest_${NAME}
