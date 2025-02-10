@@ -18,18 +18,20 @@ public:
 
 	// Set the reference to use for the temporary device buffer
 	void initializeTemporaryDeviceBuffer(const ProjectionDataDevice* master);
+	void clearTemporaryDeviceBuffer();
 
 	// For reconstruction:
 	// Pre-computes the additive correction factors
 	//  (randoms+scatter)/(acf*sensitivity) for each LOR in measurements,
 	//  but also using GPU for the attenuation image forward projection if
 	//  needed
-	void
-	    precomputeAdditiveCorrectionFactors(const ProjectionData& measurements);
+	void precomputeAdditiveCorrectionFactors(
+	    const ProjectionData& measurements) override;
 	// Pre-computes a ProjectionList of a^(i)_i for each LOR in measurements,
 	//  but also using GPU for the attenuation image forward projection if
 	//  needed
-	void precomputeInVivoAttenuationFactors(const ProjectionData& measurements);
+	void precomputeInVivoAttenuationFactors(
+	    const ProjectionData& measurements) override;
 
 	void loadAdditiveCorrectionFactorsToTemporaryDeviceBuffer(
 	    const cudaStream_t* stream = nullptr);
@@ -40,8 +42,11 @@ public:
 	const ProjectionDataDevice* getTemporaryDeviceBuffer() const;
 	ProjectionDataDevice* getTemporaryDeviceBuffer();
 
+	// Use ACF histogram for sensitivity image generation
+	void applyHardwareACFCorrectionFactorsToGivenDeviceBuffer(
+	    ProjectionDataDevice* destProjData, const cudaStream_t* stream);
 	// The projector used is in case the attenuation image needs to be projected
-	void applyHardwareAttenuationFactorsToGivenDeviceBuffer(
+	void applyHardwareAttenuationImageFactorsToGivenDeviceBuffer(
 	    ProjectionDataDevice* destProjData, OperatorProjectorDevice* projector,
 	    const cudaStream_t* stream = nullptr);
 

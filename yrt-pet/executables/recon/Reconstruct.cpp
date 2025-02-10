@@ -423,32 +423,13 @@ int main(int argc, char** argv)
 		std::unique_ptr<ImageOwned> movedSensImage = nullptr;
 		if (dataInput->hasMotion() && !sensImageAlreadyMoved)
 		{
-			ASSERT_MSG_WARNING(
-			    !invivoAttImg_fname.empty() || sensOnly,
-			    "The data input provided has motion information, but no "
-			    "in-vivo attenuation was provided.");
 			ASSERT(sensImages.size() == 1);
 			const Image* unmovedSensImage = sensImages[0].get();
 			ASSERT(unmovedSensImage != nullptr);
 
-			movedSensImage =
-			    std::make_unique<ImageOwned>(unmovedSensImage->getParams());
-			movedSensImage->allocate();
-
 			std::cout << "Moving sensitivity image..." << std::endl;
-			int64_t numFrames = dataInput->getNumFrames();
-			Util::ProgressDisplay progress{numFrames};
-			const auto scanDuration =
-			    static_cast<float>(dataInput->getScanDuration());
-			for (frame_t frame = 0; frame < numFrames; frame++)
-			{
-				progress.progress(frame);
-				transform_t transform = dataInput->getTransformOfFrame(frame);
-				const float weight =
-				    dataInput->getDurationOfFrame(frame) / scanDuration;
-				unmovedSensImage->transformImage(transform, *movedSensImage,
-				                                 weight);
-			}
+			movedSensImage = Util::timeAverageMoveSensitivityImage(
+			    *dataInput, *unmovedSensImage);
 
 			if (!out_sensImg_fname.empty())
 			{
@@ -463,6 +444,9 @@ int main(int argc, char** argv)
 		}
 		else
 		{
+			std::cout
+			    << "No motion in input file. No need to move sensitivity image."
+			    << std::endl;
 			osem->setSensitivityImages(sensImages);
 		}
 

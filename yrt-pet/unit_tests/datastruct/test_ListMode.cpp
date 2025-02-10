@@ -6,8 +6,8 @@
 #include "catch.hpp"
 
 #include "datastruct/projection/ListModeLUT.hpp"
-#include "test_utils.hpp"
 #include "utils/Array.hpp"
+#include "../test_utils.hpp"
 
 #include <cmath>
 #include <cstdio>

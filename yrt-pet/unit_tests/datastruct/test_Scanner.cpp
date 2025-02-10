@@ -8,8 +8,8 @@
 #include "datastruct/projection/Histogram3D.hpp"
 #include "datastruct/scanner/DetRegular.hpp"
 #include "datastruct/scanner/Scanner.hpp"
-#include "test_utils.hpp"
 #include "utils/Array.hpp"
+#include "../test_utils.hpp"
 
 
 TEST_CASE("scanner", "[createLUT]")

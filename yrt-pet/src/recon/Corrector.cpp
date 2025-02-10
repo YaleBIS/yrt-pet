@@ -239,7 +239,7 @@ void Corrector::setup()
 	}
 }
 
-const ProjectionData* Corrector::getSensImgGenBuffer() const
+const ProjectionData* Corrector::getSensImgGenProjData() const
 {
 	// Returns the buffer that should be used to iterate over bins and compute
 	//  LORs
@@ -263,6 +263,11 @@ bool Corrector::hasSensitivityHistogram() const
 bool Corrector::hasHardwareAttenuation() const
 {
 	return mp_hardwareAcf != nullptr || mp_hardwareAttenuationImage != nullptr;
+}
+
+bool Corrector::hasHardwareAttenuationImage() const
+{
+	return mp_hardwareAttenuationImage != nullptr;
 }
 
 bool Corrector::hasMultiplicativeCorrection() const
